@@ -1,17 +1,17 @@
 package com.moviebooking.service;
 
 import com.moviebooking.dto.request.RegisterRequest;
+import com.moviebooking.dto.response.UserResponse;
 import com.moviebooking.entity.User;
 import com.moviebooking.exception.customexception.InvalidCredentialsException;
 import com.moviebooking.exception.customexception.UserAlreadyExistsException;
 import com.moviebooking.repository.UserRepository;
 import com.moviebooking.utils.JwtUtilis;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.logging.Logger;
 
 @Service
 @Slf4j
@@ -58,5 +58,21 @@ public class UserService {
             throw new   InvalidCredentialsException("Invalid credentials");
         }
         return jwtUtilis.generateToken(email);
+    }
+
+    public UserResponse getCurrentUser() {
+        Authentication authentication
+                = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getPrincipal().toString();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("User not found for email: {}", email);
+                    return new InvalidCredentialsException("User not found");
+                });
+        UserResponse response= new UserResponse(user.getName(), user.getEmail());
+
+        return response;
+
     }
 }

@@ -30,29 +30,30 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // ✅ Skip auth endpoints
-        if(path.startsWith("/api/v1/auth")){
-            filterChain.doFilter(request,response);
+        if (path.startsWith("/api/v1/auth")) {
+            filterChain.doFilter(request, response);
             return;
         }
 
-
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+        if (authHeader != null && authHeader.startsWith("Bearer")) {
+
+            String token = authHeader.substring(7).trim();
 
             if (jwtUtilis.isTokenValid(token)) {
+
                 String email = jwtUtilis.extractEmail(token);
-                UsernamePasswordAuthenticationToken
-                        auth = new UsernamePasswordAuthenticationToken(
-                        email, null, new ArrayList<>());
-                SecurityContextHolder.getContext()
-                        .setAuthentication(auth);
+
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                email, null, new ArrayList<>());
+
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
-
-            filterChain.doFilter(request, response);
-
         }
 
+        // ✅ ALWAYS call this (VERY IMPORTANT)
+        filterChain.doFilter(request, response);
     }
 }

@@ -8,3 +8,9 @@ API, making future changes difficult.
 Instead, we use DTOs (Data Transfer Objects) to return only the required
 and safe data to the client, ensuring better security, flexibility, and 
 clean architecture.
+
+
+👉http://localhost:8081/api/v1/users/profile
+    Bearer Token
+👉http://localhost:8081/api/v1/auth/login { "email":"aash@gmail.com", "password":"aldiso"}
+👉http://localhost:8081/api/v1/auth/register {"name":"ahish","email":"aash@gmail.com","password":"aldiso"}

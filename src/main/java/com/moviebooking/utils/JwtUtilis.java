@@ -23,7 +23,7 @@ public class JwtUtilis {
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -36,6 +36,7 @@ public class JwtUtilis {
             return true;
 
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
