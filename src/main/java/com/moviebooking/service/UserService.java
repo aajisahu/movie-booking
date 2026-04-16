@@ -3,6 +3,7 @@ package com.moviebooking.service;
 import com.moviebooking.dto.request.RegisterRequest;
 import com.moviebooking.entity.User;
 import com.moviebooking.repository.UserRepository;
+import com.moviebooking.utils.JwtUtilis;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,10 +17,12 @@ public class UserService {
 
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
+    private JwtUtilis jwtUtilis;
     //Constructor Injection
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtilis jwtUtilis){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtilis = jwtUtilis;
     }
 
     // register user
@@ -42,21 +45,16 @@ public class UserService {
     }
 
     // Login user
-    public boolean login(String email, String password){
+    public String login(String email, String password){
         log.info("Login attempt for email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     log.error("Login failed: User not found for email: {}", email);
                     return new RuntimeException("Invalid user");
                 });
-        boolean isValid = passwordEncoder.matches(password, user.getPassword());
-
-        if (isValid) {
-            log.info("Login successful");
-            return isValid;
-        } else {
-            log.warn("Invalid password");
-            return isValid;
+        if(!passwordEncoder.matches(password, user.getPassword())){
+            throw new RuntimeException("Invalid credentials");
         }
+        return jwtUtilis.generateToken(email);
     }
 }

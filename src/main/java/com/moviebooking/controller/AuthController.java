@@ -1,9 +1,9 @@
 package com.moviebooking.controller;
 
+import com.moviebooking.dto.request.LoginRequest;
 import com.moviebooking.dto.request.RegisterRequest;
 import com.moviebooking.dto.response.AuthResponse;
 import com.moviebooking.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +25,12 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request){
         userService.registerUser(request);
         return ResponseEntity.ok(new AuthResponse("User registered successfully", null));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
+        String login = userService.login(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok(new AuthResponse("Login successful",login));
     }
 
 }
