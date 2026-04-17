@@ -2,6 +2,7 @@ package com.moviebooking.service;
 
 import com.moviebooking.dto.request.RegisterRequest;
 import com.moviebooking.dto.response.UserResponse;
+import com.moviebooking.entity.Role;
 import com.moviebooking.entity.User;
 import com.moviebooking.exception.customexception.InvalidCredentialsException;
 import com.moviebooking.exception.customexception.UserAlreadyExistsException;
@@ -40,6 +41,7 @@ public class UserService {
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
                 .password(encodePassword)
+                .roles(Role.USER)
                 .build();
         userRepository.save(user);
         log.info("User registered successfully with email: {}", registerRequest.getEmail());
@@ -57,7 +59,7 @@ public class UserService {
         if(!passwordEncoder.matches(password, user.getPassword())){
             throw new   InvalidCredentialsException("Invalid credentials");
         }
-        return jwtUtilis.generateToken(email);
+        return jwtUtilis.generateToken(email, user.getRoles().name());
     }
 
     public UserResponse getCurrentUser() {

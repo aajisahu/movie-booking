@@ -38,6 +38,9 @@ public class User {
     private LocalDateTime deletedAt;
     private LocalDateTime updatedAt;
 
+    @Enumerated(EnumType.STRING)
+    private Role roles;
+
 
     //  This method is automatically called just before
     //  the entity is saved to the database.
