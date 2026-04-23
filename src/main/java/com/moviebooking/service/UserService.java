@@ -1,6 +1,7 @@
 package com.moviebooking.service;
 
 import com.moviebooking.dto.request.RegisterRequest;
+import com.moviebooking.dto.request.UpdateUserRequest;
 import com.moviebooking.dto.response.UserResponse;
 import com.moviebooking.entity.Role;
 import com.moviebooking.entity.User;
@@ -30,13 +31,16 @@ public class UserService {
 
     // register user
     public void registerUser(RegisterRequest registerRequest){
+
         log.info("Register request received for email id: {}", registerRequest.getEmail());
+
         if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
             log.warn("Registration failed: Email already exists - {}", registerRequest.getEmail());
             throw new UserAlreadyExistsException("Email already exists");
         }
 
         String encodePassword = passwordEncoder.encode(registerRequest.getPassword());
+
         User user = User.builder()
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
@@ -63,6 +67,7 @@ public class UserService {
     }
 
     public UserResponse getCurrentUser() {
+
         Authentication authentication
                 = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getPrincipal().toString();
@@ -76,5 +81,33 @@ public class UserService {
 
         return response;
 
+    }
+
+    public UserResponse updateProfile(UpdateUserRequest request) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) auth.getPrincipal();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // update fields
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
+        userRepository.save(user);
+
+        return new UserResponse(user.getName(), user.getEmail());
+    }
+
+    private String getCurrentUserEmail() {
+        return (String) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
+    private User getCurrentUserEntity() {
+        return userRepository.findByEmail(getCurrentUserEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
